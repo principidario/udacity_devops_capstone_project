@@ -20,7 +20,7 @@ jobs:
   build-python:
     docker:
       # Use the same Docker base as the project
-      - image: ubuntu:latest
+      - image: ubuntu:20.04
 
     working_directory: ~/workdir
 
@@ -45,7 +45,7 @@ jobs:
   test-ml-model:
     docker:
       # Use the same Docker base as the project
-      - image: ubuntu:latest
+      - image: ubuntu:20.04
 
     working_directory: ~/workdir
 
@@ -508,9 +508,9 @@ jobs:
 workflows:
   default:
     jobs:
-        #- build-python
+        - build-python
         - test-ml-model
-        #    requires: [build-python]
+            requires: [build-python]
       # - build-frontend
       # - build-backend
       # - test-frontend:
