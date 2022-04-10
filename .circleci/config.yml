@@ -37,6 +37,10 @@ jobs:
             apt install -y python3-pip
             pip install --upgrade pip
             pip install -r requirements.txt
+      - persist_to_workspace:
+          root: ~/workdir
+          paths:
+            - .
       - save_cache:
           paths:
             - ~/workdir/cache
@@ -54,11 +58,8 @@ jobs:
       - restore_cache:
           keys:
             - v1-dependencies-{{ checksum "requirements.txt" }}
-      - run:
-          name: Install dependencies
-          command: |
-            apt update
-            apt install -y python3
+      - attach_workspace:
+          at: ~/workdir
       - run:
           name: Test ml model
           command: |
