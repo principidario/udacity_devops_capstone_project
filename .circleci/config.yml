@@ -20,7 +20,7 @@ jobs:
   build-python:
     docker:
       # Use the same Docker base as the project
-      - image: python:apline
+      - image: python:apline3.15
 
     working_directory: ~/workdir
 
@@ -46,7 +46,7 @@ jobs:
   test-ml-model:
     docker:
       # Use the same Docker base as the project
-      - image: python:alpine
+      - image: python:alpine3.15
 
     working_directory: ~/workdir
 
