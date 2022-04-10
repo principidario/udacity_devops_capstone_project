@@ -26,9 +26,9 @@ jobs:
 
     steps:
       - checkout
-      # - restore_cache:
-      #     keys:
-      #       - v1-dependencies-{{ checksum "requirements.txt" }}
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "requirements.txt" }}
       - run:
           name: Install dependencies
           command: |
@@ -508,7 +508,7 @@ jobs:
 workflows:
   default:
     jobs:
-        - build-python
+        #- build-python
         - test-ml-model
         #    requires: [build-python]
       # - build-frontend
