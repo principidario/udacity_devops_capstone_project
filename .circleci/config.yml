@@ -20,7 +20,7 @@ jobs:
   build-python:
     docker:
       # Use the same Docker base as the project
-      - image: python:apline3.15
+      - image: python:alpine3.15
 
     working_directory: ~/workdir
 
