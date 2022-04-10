@@ -29,9 +29,6 @@ jobs:
       - restore_cache:
           keys:
             - v1-dependencies-{{ checksum "requirements.txt" }}
-            # fallback to using the latest cache if no exact match is found
-            #- v1-dependencies-
-
       - run:
           name: install dependencies
           command: |
@@ -43,6 +40,28 @@ jobs:
           paths:
             - ./venv
           key: v1-dependencies-{{ checksum "requirements.txt" }}
+
+  test-ml-model:
+    docker:
+      # Use the same Docker base as the project
+      - image: python:3.9.12-slim
+
+    working_directory: ~/workdir
+
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "requirements.txt" }}
+      - run:
+          name: test ml model
+          command: |
+            python3 -m venv venv
+            . venv/bin/activate
+            python test-ml-model.py
+      
+      
+
 
   lint-python:
     docker:
@@ -486,6 +505,8 @@ workflows:
   default:
     jobs:
         - build-python
+        - test-ml-model:
+            requires: [build-python]
       # - build-frontend
       # - build-backend
       # - test-frontend:
