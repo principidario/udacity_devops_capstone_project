@@ -20,7 +20,7 @@ jobs:
   build-python:
     docker:
       # Use the same Docker base as the project
-      - image: python:alpine3.15
+      - image: ubuntu:latest
 
     working_directory: ~/workdir
 
@@ -32,8 +32,6 @@ jobs:
       - run:
           name: install dependencies
           command: |
-            apk update
-            apk add python3-opencv
             python3 -m venv venv
             . venv/bin/activate
             pip install --upgrade pip
@@ -46,7 +44,7 @@ jobs:
   test-ml-model:
     docker:
       # Use the same Docker base as the project
-      - image: python:alpine3.15
+      - image: ubuntu:latest
 
     working_directory: ~/workdir
 
