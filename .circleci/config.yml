@@ -35,13 +35,11 @@ jobs:
             apt update
             apt install -y python3
             apt install -y python3-pip
-            python3 -m venv venv
-            . venv/bin/activate
             pip install --upgrade pip
             pip install -r requirements.txt
       - save_cache:
           paths:
-            - ./venv
+            - ./workdir
           key: v1-dependencies-{{ checksum "requirements.txt" }}
 
   test-ml-model:
@@ -59,9 +57,7 @@ jobs:
       - run:
           name: test ml model
           command: |
-            python3 -m venv venv
-            . venv/bin/activate
-            python test-ml-model.py
+            python3 test-ml-model.py
       
       
 
