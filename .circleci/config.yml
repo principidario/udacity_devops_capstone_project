@@ -508,7 +508,7 @@ jobs:
 workflows:
   default:
     jobs:
-        #- build-python
+        - build-python
         - test-ml-model
         #    requires: [build-python]
       # - build-frontend
