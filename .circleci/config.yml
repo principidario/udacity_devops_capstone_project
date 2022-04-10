@@ -20,7 +20,7 @@ jobs:
   build-python:
     docker:
       # Use the same Docker base as the project
-      - image: python:3.9.12-slim
+      - image: python:latest
 
     working_directory: ~/workdir
 
@@ -66,9 +66,9 @@ jobs:
   lint-python:
     docker:
       # Use the same Docker base as the project
-      - image: python:slim
+      - image: python:latest
 
-    working_directory: ~/repo
+    working_directory: ~/workdir
 
     steps:
       - checkout
