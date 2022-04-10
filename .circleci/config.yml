@@ -30,7 +30,7 @@ jobs:
           keys:
             - v1-dependencies-{{ checksum "requirements.txt" }}
       - run:
-          name: install dependencies
+          name: Install dependencies
           command: |
             apt update
             apt install -y python3
@@ -39,7 +39,7 @@ jobs:
             pip install -r requirements.txt
       - save_cache:
           paths:
-            - ./workdir
+            - ~/workdir/cache
           key: v1-dependencies-{{ checksum "requirements.txt" }}
 
   test-ml-model:
@@ -55,7 +55,12 @@ jobs:
           keys:
             - v1-dependencies-{{ checksum "requirements.txt" }}
       - run:
-          name: test ml model
+          name: Install dependencies
+          command: |
+            apt update
+            apt install -y python3
+      - run:
+          name: Test ml model
           command: |
             python3 test-ml-model.py
       
@@ -503,9 +508,9 @@ jobs:
 workflows:
   default:
     jobs:
-        - build-python
-        - test-ml-model:
-            requires: [build-python]
+        #- build-python
+        - test-ml-model
+        #    requires: [build-python]
       # - build-frontend
       # - build-backend
       # - test-frontend:
