@@ -19,7 +19,7 @@ commands:
 jobs:
   lint-python:
     docker:
-      - image: python:latest
+      - image: python:3.9.12-slim
 
     #working_directory: ~/workdir
 
@@ -51,7 +51,7 @@ jobs:
 
   lint-docker:
     docker:
-      - image: python:latest
+      - image: python:3.9.12-slim
 
     #working_directory: ~/workdir
 
