@@ -11,4 +11,3 @@
     - ansible_stdout_callback: yaml
   roles:
     - deploy
-    - node-exporter

@@ -116,8 +116,8 @@ jobs:
       - run:
           name: Add back-end ip to ansible inventory
           command: |
-            #export BACKEND_IP=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" --query "Reservations[].Instances[].PublicDnsName[]" | grep ec2 | sed 's/\"//g' | sed 's/ //g')
-            export BACKEND_IP=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=backend-*" --query "Reservations[].Instances[].PublicDnsName[]" | grep ec2 | sed 's/\"//g' | sed 's/ //g')
+            #export BACKEND_IP=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=backend-udacity-devops-capstone-${CIRCLE_WORKFLOW_ID:0:7}" --query "Reservations[].Instances[].PublicDnsName[]" | grep ec2 | sed 's/\"//g' | sed 's/ //g')
+            export BACKEND_IP=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=backend-udacity-devops-capstone-*" --query "Reservations[].Instances[].PublicDnsName[]" | grep ec2 | sed 's/\"//g' | sed 's/ //g')
             echo $BACKEND_IP >> .circleci/ansible/inventory.txt
       - persist_to_workspace:
           root: ~/
@@ -127,109 +127,6 @@ jobs:
 #         workflow-id: ${CIRCLE_WORKFLOW_ID:0:7}
 
 
-  configure-infrastructure:
-    docker:
-      - image: ansible/ansible:default
-    environment:
-      - TYPEORM_CONNECTION: "{{ lookup('env', 'TYPEORM_CONNECTION')}}"
-      - TYPEORM_ENTITIES: "{{ lookup('env', 'TYPEORM_ENTITIES')}}"
-      - TYPEORM_HOST: "{{ lookup('env', 'TYPEORM_HOST')}}"
-      - TYPEORM_PORT: 5432
-      - TYPEORM_USERNAME: "{{ lookup('env', 'TYPEORM_USERNAME')}}"
-      - TYPEORM_PASSWORD: "{{ lookup('env', 'TYPEORM_PASSWORD')}}"
-      - TYPEORM_DATABASE: "{{ lookup('env', 'TYPEORM_DATABASE')}}"
-      - TYPEORM_MIGRATIONS: "{{ lookup('env', 'TYPEORM_MIGRATIONS')}}"
-      - TYPEORM_MIGRATIONS_DIR: "{{ lookup('env', 'TYPEORM_MIGRATIONS_DIR')}}"
-    steps:
-      - checkout
-      - add_ssh_keys:
-          fingerprints:
-            - 3c:ee:06:16:84:cf:68:6e:12:17:e4:34:eb:63:f4:85
-      - attach_workspace:
-          at: ~/
-      - run:
-          name: Install dependencies
-          command: |
-            apt update
-            apt install -y tar gzip ansible awscli
-      
-      - run:
-          name: Configure server (Command runs OK in shell, but here say "cannot verify the authenticity of the host..do you want to continue?(yes/no)")
-          command: |
-              cd .circleci/ansible
-              #ansible-playbook --private-key udacity.pem -e env=${CIRCLE_BRANCH} -i inventory.txt configure-server.yml
-#     # Here's where you will add some code to rollback on failure      
-#     - destroy-environment:
-#         workflow-id: ${CIRCLE_WORKFLOW_ID:0:7}
-
-
-
-
-  run-migrations:
-    docker:
-      - image: alpine
-    steps:
-      - checkout
-      - run:
-          name: Prerequisites
-          command: |
-            apk update
-            apk add npm    
-      - run:
-          name: Run migrations
-          command: |
-            cd backend
-            npm install
-            npm run migrations > migrations_dump.txt
-      - run:
-          name: Send migration results to memstash
-          command: |
-            if grep -q "has been executed successfully." ~/project/backend/migrations_dump.txt
-            then
-                # If you are using memstash.io, generate the token "7933fe63-4687-4fa1-8426-aa25aa1730ec" on the website
-                #curl -H "Content-Type: text/plain" -H "token: 7933fe63-4687-4fa1-8426-aa25aa1730ec" --request PUT --data "1" https://api.memstash.io/values/migration_${CIRCLE_WORKFLOW_ID:0:7}
-                # If you are using kvdb.io, generate the bucket ID "9GE4jRtKznmVKRfvdBABBe" in your local terminal first
-                curl https://kvdb.io/MF4Z6WcS9GKpPStzupaQix/migration_${CIRCLE_WORKFLOW_ID:0:7}  -d '1'
-            fi
-            
-      # Here's where you will add some code to rollback on failure      
-      #- revert-migrations:
-          #workflow-id: ${CIRCLE_WORKFLOW_ID:0:7}
-
-  deploy-frontend:
-    docker:
-      - image: alpine
-    steps:
-      - checkout
-      - run:
-          name: Install dependencies
-          command: |
-            apk update
-            apk add npm
-            apk add --no-cache python3 py3-pip \
-            && pip3 install --upgrade pip \
-            && pip3 install awscli \
-            && rm -rf /var/cache/apk/*
-      - run:
-          name: Get backend url
-          command: |
-            #export BACKEND_IP=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" --query "Reservations[].Instances[].PublicDnsName")
-            export BACKEND_IP=ec2-18-212-89-41.compute-1.amazonaws.com
-            export API_URL="http://${BACKEND_IP}:3030"
-            echo "API_URL = ${API_URL}"
-            echo API_URL="http://${BACKEND_IP}:3030" >> frontend/.env
-            cat frontend/.env
-      - run:
-          name: Deploy frontend objects
-          command: |
-            cd frontend
-            npm install
-            npm run build
-            tar -czvf artifact-"${CIRCLE_WORKFLOW_ID:0:7}".tar.gz dist
-            aws --version
-            #aws s3 cp dist s3://udapeople-f11a082 --recursive
-            #aws s3 cp dist s3://udapeople-${CIRCLE_WORKFLOW_ID:0:7} --recursive
-            # Here's where you will add some code to rollback on failure      
                   
   deploy-backend:
     docker:
