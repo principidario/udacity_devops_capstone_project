@@ -19,10 +19,9 @@ commands:
 jobs:
   lint-python:
     docker:
-      # Use the same Docker base as the project
-      - image: ubuntu:latest
+      - image: python:3.7.3-stretch
 
-    #working_directory: ~/workdir
+    working_directory: ~/workdir
 
     steps:
       - checkout
@@ -33,10 +32,6 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            apt update
-            apt install -y python3
-            apt install -y python3-pip
-            apt install python3.8-venv
             python3 -m venv venv
             . venv/bin/activate
             pip install --upgrade pip
@@ -46,12 +41,43 @@ jobs:
           name: Run lint
           command: |
             . venv/bin/activate
-            pylint --disable=R,C,W1203,W1202 test-ml-model.py
+            pylint --disable=R,C,W1203,W1202 app.py
 
       - save_cache:
           paths:
             - ./venv
           key: v1-dependencies-{{ checksum "requirements.txt" }}
+
+  lint-docker:
+    docker:
+      - image: python:3.7.3-stretch
+
+    working_directory: ~/workdir
+
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - v1-dependencies-{{ checksum "requirements.txt" }}
+            
+      - run:
+          name: Install dependencies
+          command: |
+            . venv/bin/activate
+            wget -O /bin/hadolint https://github.com/hadolint/hadolint/releases/download/v1.16.3/hadolint-Linux-x86_64 &&\
+            chmod +x /bin/hadolint
+
+      - run:
+          name: Run lint
+          command: |
+            . venv/bin/activate
+            hadolint Dockerfile
+
+      - save_cache:
+          paths:
+            - ./venv
+          key: v1-dependencies-{{ checksum "requirements.txt" }}
+
 
 
   build-frontend:
@@ -466,6 +492,7 @@ workflows:
   default:
     jobs:
         - lint-python
+        - lint-docker
       # - build-frontend
       # - build-backend
       # - test-frontend:

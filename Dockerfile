@@ -6,11 +6,9 @@ WORKDIR /project
 ## Step 2:
 COPY ./app.py /project/
 COPY ./requirements.txt /project/
-COPY ./model.h5 /project/
 
 ## Step 3:
 RUN pip3 install -r requirements.txt
-# hadolint ignore=DL3013
 
 ## Step 4:
 EXPOSE 80

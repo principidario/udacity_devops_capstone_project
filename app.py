@@ -1,42 +1,40 @@
-import logging
-import numpy as np # linear algebra
-from flask import Flask, request#,jsonify
-from flask.logging import create_logger
-from keras.models import load_model
+import os
+from flask import Flask, request
+from werkzeug.utils import secure_filename
 
+
+UPLOAD_FOLDER = 'uploads'
+ALLOWED_EXTENSIONS = {'mp4'}
 
 app = Flask(__name__)
-LOG = create_logger(app)
-LOG.setLevel(logging.INFO)
-
-@app.route("/")
-def home():
-    html = "<h3>Sklearn Prediction Home</h3>"
-    return html.format(format)
-
-@app.route("/predict", methods=['POST'])
-def predict():
-    """Performs an sklearn prediction
-        input looks like:
-        {"SL":0.07471338, "SW":0.09794497, "PL":0.02951407, "PW": 0.01150299}
-        result looks like:
-        { "prediction": [ <val> ] }
-    """
-    # Logging the input payload
-    data = request.json
-    LOG.info("JSON payload:" + str(data) + '\n')
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 
-    x_test = [[data['SL'], data['SW'], data['PL'], data['PW']]]
-    prediction=model.predict(x_test)
-    predict_label=np.argmax(prediction,axis=1)
-    output = {}
-    output['prediction'] = str(predict_label[0])
-    # TO DO:  Log the output prediction value
-    LOG.info("Predicted label:" + str(predict_label[0]) + '\n')
-    #return jsonify({'prediction': prediction})
-    return str(output)
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@app.route("/run", methods=['POST'])
+def run():
+    if request.method == 'POST':
+        # check if the post request has the file part
+        if 'file' not in request.files:
+            flash('No file part')
+            return redirect(request.url)
+        file = request.files['file']
+        # If the user does not select a file, the browser submits an
+        # empty file without a filename.
+        if file.filename == '':
+            flash('No selected file')
+            return redirect(request.url)
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            
+            #Run ML model to predict Oxygen Saturation in Arterial Blood
+            
+            return "SPO2: 98%"
 
 if __name__ == "__main__":
-    model = load_model('model.h5')
+    #load model
     app.run(host='0.0.0.0', port=8000, debug=True) # specify port=80
