@@ -19,9 +19,7 @@ commands:
 jobs:
   lint-python:
     docker:
-      - image: ubuntu:latest
-
-    #working_directory: ~/workdir
+      - image: python:3.7.3-stretch
 
     steps:
       - checkout
@@ -50,9 +48,7 @@ jobs:
 
   lint-docker:
     docker:
-      - image: ubuntu:latest
-
-    #working_directory: ~/workdir
+      - image: python:3.7.3-stretch
 
     steps:
       - checkout
@@ -81,48 +77,20 @@ jobs:
           key: v1-dependencies-{{ checksum "requirements.txt" }}
 
   build-docker:
-    working_directory: /app
-    docker:
-      - image: docker
+    machine: true
     steps:
       - checkout
-      - setup_remote_docker
-      - run:
-          name: Install dependencies
-          command: |
-            apk add --no-cache \
-              py-pip
-            pip install \
-              docker-compose \
-              awscli==1.11.76
-      - run:
-          name: Build application Docker image
-          command: |
-            docker build -t udacity-devops-capstone .
-      - run:
-          name: Save Docker image layer cache
-          command: |
-            mkdir -p /caches
-            docker save -o /caches/app.tar app
-      - save_cache:
-          key: v1-{{ .Branch }}-{{ epoch }}
-          paths:
-            - /caches/app.tar
-      - run:
-          name: Run tests
-          command: |
-            docker-compose -f ./docker-compose.test.yml up
-      - deploy:
-          name: Push application Docker image
-          command: |
-            if [ "${CIRCLE_BRANCH}" == "main" ]; then
-              export $DOCKERHUB_USER="{{ lookup('env', 'DOCKERHUB_USER')}}"
-              export $DOCKERHUB_PASS="{{ lookup('env', 'DOCKERHUB_PASS')}}"
-              docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASS
-              #docker tag app "${ECR_ENDPOINT}/app:${CIRCLE_SHA1}"
-              #docker push "${ECR_ENDPOINT}/app:${CIRCLE_SHA1}"
-            fi
+      # login to dockerhub
+      - run: |
+          export $DOCKER_USER="{{ lookup('env', 'DOCKER_USER')}}"
+          export $DOCKER_PASS="{{ lookup('env', 'DOCKER_PASS')}}"
+          docker login --username $DOCKER_USER --password $DOCKER_PASS
+        
+      # build the application image
+      - run: docker build -t $DOCKER_USER/udacity-devops-capstone:latest .
 
+      # deploy the image
+      - run: docker push $DOCKER_USER/udacity-devops-capstone:latest
 
 
   build-frontend:
