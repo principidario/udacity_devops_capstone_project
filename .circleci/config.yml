@@ -17,7 +17,7 @@ commands:
 
             
 jobs:
-  build-python:
+  lint-python:
     docker:
       # Use the same Docker base as the project
       - image: ubuntu:latest
@@ -41,67 +41,23 @@ jobs:
             . venv/bin/activate
             pip install --upgrade pip
             pip install -r requirements.txt
-      - save_cache:
-          paths:
-            - ./venv
-          key: v1-dependencies-{{ checksum "requirements.txt" }}
-
-  test-ml-model:
-    docker:
-      # Use the same Docker base as the project
-      - image: ubuntu:latest
-
-    #working_directory: ~/workdir
-
-    steps:
-      - checkout
-      - restore_cache:
-          keys:
-            - v1-dependencies-{{ checksum "requirements.txt" }}
-      - run:
-          name: Install dependencies
-          command: |
-            apt update
-            apt install -y python3
-            apt install -y python3-pip
-            apt install python3.8-venv
-      - run:
+        
+        - run:
           name: Test ml model
           command: |
             . venv/bin/activate
             python3 test-ml-model.py
-      
-      
-
-
-  lint-python:
-    docker:
-      # Use the same Docker base as the project
-      - image: python:latest
-
-    working_directory: ~/workdir
-
-    steps:
-      - checkout
-      - restore_cache:
-          keys:
-            - v1-dependencies-{{ checksum "requirements.txt" }}
-            # fallback to using the latest cache if no exact match is found
-            - v1-dependencies-
-
-      - run:
-          name: install dependencies
+        
+        - run:
+          name: Run lint
           command: |
-            python3 -m venv venv
             . venv/bin/activate
-            # Install hadolint
-            wget -O /bin/hadolint https://github.com/hadolint/hadolint/releases/download/v1.16.3/hadolint-Linux-x86_64 &&\
-            chmod +x /bin/hadolint
+            pylint --disable=R,C,W1203,W1202 test-ml-model.py
+
       - save_cache:
           paths:
             - ./venv
           key: v1-dependencies-{{ checksum "requirements.txt" }}
-
 
 
   build-frontend:
@@ -515,9 +471,7 @@ jobs:
 workflows:
   default:
     jobs:
-        - build-python
-        - test-ml-model:
-            requires: [build-python]
+        - lynt-python
       # - build-frontend
       # - build-backend
       # - test-frontend:
