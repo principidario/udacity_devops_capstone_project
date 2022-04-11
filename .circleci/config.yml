@@ -9,10 +9,9 @@ commands:
     
     steps:
       - run:
-          name: Destroy environments
+          name: destroy environments
           when: on_fail
           command: |
-            #aws cloudformation delete-stack --stack-name udapeople-frontend-<< parameters.workflow-id >>
             #aws cloudformation delete-stack --stack-name udapeople-backend-<< parameters.workflow-id >>
 
             
@@ -28,7 +27,7 @@ jobs:
             - v1-dependencies-{{ checksum "requirements.txt" }}
             
       - run:
-          name: Install dependencies
+          name: install dependencies
           command: |
             apt update
             apt install -y python3
@@ -37,7 +36,7 @@ jobs:
             pip install -r requirements.txt
         
       - run:
-          name: Run lint
+          name: run lint
           command: |
             pylint --disable=R,C,W1203,W1202 app.py
 
@@ -57,7 +56,7 @@ jobs:
             - v1-dependencies-{{ checksum "requirements.txt" }}
             
       - run:
-          name: Install dependencies
+          name: install dependencies
           command: |
             apt update
             apt install -y python3
@@ -67,7 +66,7 @@ jobs:
             chmod +x /bin/hadolint
 
       - run:
-          name: Run lint
+          name: run lint
           command: |
             hadolint Dockerfile
 
@@ -76,142 +75,25 @@ jobs:
             - ./venv
           key: v1-dependencies-{{ checksum "requirements.txt" }}
 
+  
   build-docker:
     machine: true
     steps:
       - checkout
-      # login to dockerhub
-      - run: |
-          docker login --username ${DOCKER_USER} --password ${DOCKER_PASS}
+      - run: 
+          name: login to dockerhub
+          command: |
+            docker login --username ${DOCKER_USER} --password ${DOCKER_PASS}
         
-      # build the application image
-      - run: docker build -t $DOCKER_USER/udacity-devops-capstone:latest .
-
-      # deploy the image
-      - run: docker push $DOCKER_USER/udacity-devops-capstone:latest
-
-
-  build-frontend:
-    docker:
-      - image: circleci/node:13.8.0
-    steps:
-      - checkout
-      - restore_cache:
-          keys: [frontend-build]
       - run:
-          name: Build front-end
-          command: |
-              cd frontend
-              npm install
-              npm run build
-      - save_cache:
-          paths: [frontend/node_modules]
-          key: frontend-build
-
-  build-backend:
-    docker:
-      - image: circleci/node:13.8.0
-    steps:
-      - checkout
-      - restore_cache:
-          keys: [backend-build]
+          name: build the application image
+          command: | 
+            docker build -t $DOCKER_USER/udacity-devops-capstone:latest .
+      
       - run:
-          name: Back-end build
+          name: push the image to dockerhub
           command: |
-              cd backend
-              npm install
-              npm run build
-      - save_cache:
-          paths: [backend/node_modules]
-          key: backend-build
-
-  test-frontend:
-    docker:
-      - image: circleci/node:13.8.0
-    steps:
-      - checkout
-      - restore_cache:
-          keys: [frontend-test]
-      - run:
-          name: Test Frontend
-          command: |
-              cd frontend
-              npm install
-              npm run test
-      - save_cache:
-          paths: [frontend/node_modules]
-          key: frontend-test
-                
-  test-backend:
-    docker:
-      - image: circleci/node:13.8.0
-    steps:
-      - checkout
-      - restore_cache:
-          keys: [backend-test]
-      - run:
-          name: Test Backend
-          command: |
-              cd backend
-              npm install
-              npm run test
-      - save_cache:
-          paths: [backend/node_modules]
-          key: backend-test
-            
-  scan-frontend:
-    docker:
-      - image: circleci/node:13.8.0
-    steps:
-      - checkout
-      - restore_cache:
-          keys: [frontend-scan]
-      - run:
-          name: Scan Frontend
-          command: |
-              cd frontend
-              npm install
-              npm audit fix --audit-level=critical --force
-              npm audit --audit-level=critical
-      - save_cache:
-          paths: [frontend/node_modules]
-          key: frontend-scan
-
-
-  scan-backend:
-    docker:
-      - image: circleci/node:13.8.0
-    steps:
-      - checkout
-      - restore_cache:
-          keys: [backend-scan]
-      - run:
-          name: Scan Backend
-          command: |
-              cd backend
-              npm install
-              #npm audit fix --audit-level=critical --force
-              #npm audit --audit-level=critical
-      - save_cache:
-          paths: [backend/node_modules]
-          key: backend-scan
-      - slack/notify:
-          custom: |
-            {
-              "blocks": [
-                {
-                  "type": "section",
-                  "fields": [
-                    {
-                      "type": "plain_text",
-                      "text": "*Failed with errors*",
-                      "emoji": true
-                    }
-                  ]
-                }
-              ]
-            }
-          event: fail
+            docker push $DOCKER_USER/udacity-devops-capstone:latest
 
 
   deploy-infrastructure:
@@ -223,21 +105,13 @@ jobs:
           name: Install tar and qzip
           command: |
             yum -y install tar gzip
-      # - run:
-      #     name: Ensure back-end infrastructure exists
-      #     command: |
-      #       aws cloudformation deploy \
-      #         --template-file .circleci/files/backend.yml \
-      #         --tags project=udapeople \
-      #         --stack-name "udapeople-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
-      #         --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"
       - run:
-          name: Ensure front-end infrastructure exist
+          name: Ensure back-end infrastructure exists
           command: |
             aws cloudformation deploy \
-              --template-file .circleci/files/frontend.yml \
+              --template-file .circleci/files/backend.yml \
               --tags project=udapeople \
-              --stack-name "udapeople-frontend-${CIRCLE_WORKFLOW_ID:0:7}" \
+              --stack-name "udacity-capstone-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
               --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"
       - run:
           name: Add back-end ip to ansible inventory
@@ -249,7 +123,6 @@ jobs:
           root: ~/
           paths:
             - project/.circleci/ansible/inventory.txt
-#     # Here's where you will add some code to rollback on failure      
 #     - destroy-environment:
 #         workflow-id: ${CIRCLE_WORKFLOW_ID:0:7}
 
@@ -504,18 +377,9 @@ workflows:
     jobs:
         #- lint-python
         #- lint-docker
-        - build-docker
-      # - build-frontend
-      # - build-backend
-      # - test-frontend:
-      #     requires: [build-frontend]
-      # - test-backend:
-      #     requires: [build-backend]
-      # - scan-backend:
-      #     requires: [build-backend]
-      # - scan-frontend:
-      #     requires: [build-frontend]
-      #  - deploy-infrastructure
+        #- build-docker
+        #    requires: [lint-docker]
+        - deploy-infrastructure
       
       # - deploy-infrastructure:
       #     requires: [test-frontend, test-backend, scan-frontend, scan-backend]
