@@ -22,7 +22,7 @@ jobs:
       # Use the same Docker base as the project
       - image: ubuntu:latest
 
-    working_directory: ~/workdir
+    #working_directory: ~/workdir
 
     steps:
       - checkout
@@ -50,7 +50,7 @@ jobs:
       # Use the same Docker base as the project
       - image: ubuntu:latest
 
-    working_directory: ~/workdir
+    #working_directory: ~/workdir
 
     steps:
       - checkout
