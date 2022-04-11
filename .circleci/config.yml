@@ -21,7 +21,7 @@ jobs:
     docker:
       - image: python:3.7.3-stretch
 
-    working_directory: ~/workdir
+    #working_directory: ~/workdir
 
     steps:
       - checkout
@@ -52,7 +52,7 @@ jobs:
     docker:
       - image: python:3.7.3-stretch
 
-    working_directory: ~/workdir
+    #working_directory: ~/workdir
 
     steps:
       - checkout
