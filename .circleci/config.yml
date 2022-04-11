@@ -78,12 +78,13 @@ jobs:
 
   build-docker:
     machine: true
+    environment:
+      - DOCKER_USER: "{{ lookup('env', 'DOCKER_USER')}}"
+      - DOCKER_PASS: "{{ lookup('env', 'DOCKER_PASS')}}"
     steps:
       - checkout
       # login to dockerhub
       - run: |
-          export $DOCKER_USER="{{ lookup('env', 'DOCKER_USER')}}"
-          export $DOCKER_PASS="{{ lookup('env', 'DOCKER_PASS')}}"
           docker login --username $DOCKER_USER --password $DOCKER_PASS
         
       # build the application image
@@ -504,8 +505,8 @@ jobs:
 workflows:
   default:
     jobs:
-        - lint-python
-        - lint-docker
+        #- lint-python
+        #- lint-docker
         - build-docker
       # - build-frontend
       # - build-backend
