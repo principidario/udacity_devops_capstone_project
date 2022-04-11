@@ -26,6 +26,6 @@
 - name: Get minikube
   get_url: 
     url: https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
-    dest: ~/minikube-linux-amd64
+    dest: /home/ubuntu/minikube-linux-amd64
 - name: Install minikube
-  command: install minikube-linux-amd64 /usr/local/bin/minikube
+  command: install /home/ubuntu/minikube-linux-amd64 /usr/local/bin/minikube
