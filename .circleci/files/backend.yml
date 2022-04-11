@@ -33,10 +33,10 @@ Resources:
       # Ubuntu 18 or higher works fine
       ImageId: ami-04505e74c0741db8d 
       BlockDeviceMappings:
-        - DeviceName: /dev/xvda
+        - DeviceName: /dev/sda1
           Ebs:
             VolumeType: gp2
-            VolumeSize: '32'
+            VolumeSize: '48'
             DeleteOnTermination: 'true'
             Encrypted: 'false'
       Tags:
