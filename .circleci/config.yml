@@ -78,14 +78,11 @@ jobs:
 
   build-docker:
     machine: true
-    environment:
-      - DOCKER_USER: "{{ lookup('env', 'DOCKER_USER')}}"
-      - DOCKER_PASS: "{{ lookup('env', 'DOCKER_PASS')}}"
     steps:
       - checkout
       # login to dockerhub
       - run: |
-          docker login --username $DOCKER_USER --password $DOCKER_PASS
+          docker login --username ${DOCKER_USER} --password ${DOCKER_PASS}
         
       # build the application image
       - run: docker build -t $DOCKER_USER/udacity-devops-capstone:latest .
