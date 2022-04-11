@@ -33,8 +33,8 @@ jobs:
           name: Install dependencies
           command: |
             apt update
-            apt install python3
-            apt install python3-pip
+            apt install -y python3
+            apt install -y python3-pip
             python3 -m venv venv
             . venv/bin/activate
             pip install --upgrade pip
@@ -67,8 +67,8 @@ jobs:
           name: Install dependencies
           command: |
             apt update
-            apt install python3
-            apt install python3-pip
+            apt install -y python3
+            apt install -y python3-pip
             . venv/bin/activate
             wget -O /bin/hadolint https://github.com/hadolint/hadolint/releases/download/v1.16.3/hadolint-Linux-x86_64 &&\
             chmod +x /bin/hadolint
