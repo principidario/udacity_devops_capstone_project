@@ -31,12 +31,18 @@
 - name: Reset ssh connection to allow user changes to affect ansible user
   ansible.builtin.meta:
     reset_connection
+- name: Get kubectl
+  get_url: 
+    url: https://dl.k8s.io/release/v1.23.5/bin/linux/amd64/kubectl
+    dest: /home/ubuntu/kubectl
+- name: Install kubectl
+  command: install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
 - name: Get minikube
   get_url: 
     url: https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
     dest: /home/ubuntu/minikube-linux-amd64
 - name: Install minikube
   command: install /home/ubuntu/minikube-linux-amd64 /usr/local/bin/minikube
-- name: run minikube
+- name: Run minikube
   become: no
   command: minikube start

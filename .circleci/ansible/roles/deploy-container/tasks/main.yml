@@ -1,0 +1,9 @@
+- name: Run the Docker Hub container with kubernetes
+  become: no
+  command: kubectl run ml --image={{DOCKERPATH}} --restart=Never
+- name:  Expose container port
+  become: no
+  command: kubectl expose pod ml --port=80 --name=ml-http
+- name: Forward container port
+  become: no
+  command: kubectl port-forward pod/ml 8000:80

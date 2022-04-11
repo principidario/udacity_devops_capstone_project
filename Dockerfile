@@ -11,6 +11,9 @@ COPY ./requirements.txt /project/
 RUN pip3 install -r requirements.txt
 
 ## Step 4:
-EXPOSE 80
+RUN mkdir -p uploads
+
 ## Step 5:
+EXPOSE 80
+## Step 6:
 ENTRYPOINT  ["python3","app.py"]

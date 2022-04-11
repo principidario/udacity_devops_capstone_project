@@ -88,12 +88,14 @@ jobs:
       - run:
           name: build the application image
           command: | 
-            docker build -t $DOCKER_USER/udacity-devops-capstone:latest .
+            #docker build -t $DOCKER_USER/udacity-devops-capstone:latest .
+            docker build -t $DOCKERPATH .
       
       - run:
           name: push the image to dockerhub
           command: |
-            docker push $DOCKER_USER/udacity-devops-capstone:latest
+            #docker push $DOCKER_USER/udacity-devops-capstone:latest
+            docker push $DOCKERPATH
 
 
   deploy-infrastructure:
@@ -151,7 +153,7 @@ jobs:
             cd .circleci/ansible
             echo "Contents  of the inventory.txt file is -------"
             cat inventory.txt
-            ansible-playbook --private-key udacity.pem -i inventory.txt deploy-backend.yml
+            ansible-playbook --private-key udacity.pem -e DOCKERPATH=$DOCKERPATH -i inventory.txt deploy-backend.yml
 #     - destroy-environment:
 #         workflow-id: ${CIRCLE_WORKFLOW_ID:0:7}
 
@@ -266,14 +268,14 @@ workflows:
   default:
     jobs:
         #- lint-python
-        #- lint-docker
-        #- build-docker
+        - lint-docker
+        - build-docker
         #    requires: [lint-docker]
         #- deploy-infrastructure
       
       # - deploy-infrastructure:
       #     requires: [lint-python, build-docker]
-      - deploy-backend
+      #- deploy-backend
       #- deploy-backend:
       #    requires: [run-migrations]
       #- smoke-test
