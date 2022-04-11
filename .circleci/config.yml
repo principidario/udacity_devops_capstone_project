@@ -66,6 +66,7 @@ jobs:
             apt update
             apt install -y python3
             apt install -y python3-pip
+            apt install -y wget
             wget -O /bin/hadolint https://github.com/hadolint/hadolint/releases/download/v1.16.3/hadolint-Linux-x86_64 &&\
             chmod +x /bin/hadolint
 
@@ -78,6 +79,49 @@ jobs:
           paths:
             - ./venv
           key: v1-dependencies-{{ checksum "requirements.txt" }}
+
+  build-docker:
+    working_directory: /app
+    docker:
+      - image: docker
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Install dependencies
+          command: |
+            apk add --no-cache \
+              py-pip
+            pip install \
+              docker-compose \
+              awscli==1.11.76
+      - run:
+          name: Build application Docker image
+          command: |
+            docker build -t udacity-devops-capstone .
+      - run:
+          name: Save Docker image layer cache
+          command: |
+            mkdir -p /caches
+            docker save -o /caches/app.tar app
+      - save_cache:
+          key: v1-{{ .Branch }}-{{ epoch }}
+          paths:
+            - /caches/app.tar
+      - run:
+          name: Run tests
+          command: |
+            docker-compose -f ./docker-compose.test.yml up
+      - deploy:
+          name: Push application Docker image
+          command: |
+            if [ "${CIRCLE_BRANCH}" == "main" ]; then
+              export $DOCKERHUB_USER="{{ lookup('env', 'DOCKERHUB_USER')}}"
+              export $DOCKERHUB_PASS="{{ lookup('env', 'DOCKERHUB_PASS')}}"
+              docker login -u $DOCKERHUB_USER -p $DOCKERHUB_PASS
+              #docker tag app "${ECR_ENDPOINT}/app:${CIRCLE_SHA1}"
+              #docker push "${ECR_ENDPOINT}/app:${CIRCLE_SHA1}"
+            fi
 
 
 
@@ -494,6 +538,7 @@ workflows:
     jobs:
         - lint-python
         - lint-docker
+        - build-docker
       # - build-frontend
       # - build-backend
       # - test-frontend:
