@@ -42,13 +42,13 @@ jobs:
             pip install --upgrade pip
             pip install -r requirements.txt
         
-        - run:
+      - run:
           name: Test ml model
           command: |
             . venv/bin/activate
             python3 test-ml-model.py
         
-        - run:
+      - run:
           name: Run lint
           command: |
             . venv/bin/activate
