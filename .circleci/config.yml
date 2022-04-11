@@ -120,7 +120,7 @@ jobs:
             export BACKEND_IP=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=backend-udacity-devops-capstone-*" --query "Reservations[].Instances[].PublicDnsName[]" | grep ec2 | sed 's/\"//g' | sed 's/ //g')
             echo $BACKEND_IP >> .circleci/ansible/inventory.txt
       - persist_to_workspace:
-          root: ~/
+          root: workspace
           paths:
             - project/.circleci/ansible/inventory.txt
 #     - destroy-environment:
@@ -133,9 +133,6 @@ jobs:
       - image: alpine
     steps:
       - checkout
-      - add_ssh_keys:
-          fingerprints:
-            - "3c:ee:06:16:84:cf:68:6e:12:17:e4:34:eb:63:f4:85"
       - attach_workspace:
           at: /tmp/workspace
       - run:
@@ -151,19 +148,15 @@ jobs:
       - run:
           name: Deploy backend
           command: |
-            cd backend
-            npm install
-            npm run build
-            cd ..
-            # Zip the directory
-            tar -C backend -czvf artifact.tar.gz .
             cd .circleci/ansible
             echo "Contents  of the inventory.txt file is -------"
             cat inventory.txt
-            #ansible-playbook -i inventory.txt deploy-backend.yml
-      # Here's where you will add some code to rollback on failure  
-      #- revert-migrations:
-          #workflow-id: ${CIRCLE_WORKFLOW_ID:0:7}
+            ansible-playbook --private-key udacity.pem -i inventory.txt deploy-backend.yml
+#     - destroy-environment:
+#         workflow-id: ${CIRCLE_WORKFLOW_ID:0:7}
+
+
+
   smoke-test:
     docker:
       - image: alpine
@@ -276,22 +269,11 @@ workflows:
         #- lint-docker
         #- build-docker
         #    requires: [lint-docker]
-        - deploy-infrastructure
+        #- deploy-infrastructure
       
       # - deploy-infrastructure:
-      #     requires: [test-frontend, test-backend, scan-frontend, scan-backend]
-      #     #filters:
-      #       #branches:
-      #         #only: [test-feature-branch]
-      # - configure-infrastructure:
-      #     requires: [deploy-infrastructure]
-      #- run-migrations
-      #- run-migrations:
-      #    requires: [configure-infrastructure]
-      #- deploy-frontend
-      #- deploy-frontend:
-      #    requires: [test-frontend, test-backend, scan-frontend, scan-backend]
-      #- deploy-backend
+      #     requires: [lint-python, build-docker]
+      - deploy-backend
       #- deploy-backend:
       #    requires: [run-migrations]
       #- smoke-test
