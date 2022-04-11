@@ -32,7 +32,7 @@ jobs:
       - run:
           name: Install dependencies
           command: |
-            apt install python3-venv
+            apt install python3.9-venv
             python3 -m venv venv
             . venv/bin/activate
             pip install --upgrade pip
