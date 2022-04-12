@@ -175,9 +175,8 @@ jobs:
       - run:
           name: Backend smoke test.
           command: |
-            #export BACKEND_IP=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=backend-udacity-devops-capstone-${CIRCLE_WORKFLOW_ID:0:7}" --query "Reservations[].Instances[].PublicDnsName")
-            export BACKEND_IP=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=backend-udacity-devops-capstone-*" --query "Reservations[].Instances[].PublicDnsName" | sed 's/[//'' | sed 's/]//' | sed 's/"//g')
-            #export BACKEND_IP=ec2-18-212-89-41.compute-1.amazonaws.com
+            #export BACKEND_IP=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=backend-udacity-devops-capstone-${CIRCLE_WORKFLOW_ID:0:7}" --query "Reservations[].Instances[].PublicDnsName" | sed 's/\[//' | sed 's/\]//' | sed 's/\"//g' | tr -d '\n' | sed 's/ //g')
+            export BACKEND_IP=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=backend-udacity-devops-capstone-*" --query "Reservations[].Instances[].PublicDnsName" | sed 's/\[//' | sed 's/\]//' | sed 's/\"//g' | tr -d '\n' | sed 's/ //g')
             
             export API_URL="http://${BACKEND_IP}:8000"
             echo "${API_URL}"
