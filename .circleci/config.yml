@@ -237,10 +237,7 @@ jobs:
           command: |
             if [[ "${STACKS[@]}" =~ "${OldWorkflowID}" ]]
             then
-              echo "Removing s3 bucket, frontend and backend stack"
-              # aws s3 rm "s3://udapeople-${OldWorkflowID}" --recursive
               # aws cloudformation delete-stack --stack-name "udapeople-backend-${OldWorkflowID}"
-              # aws cloudformation delete-stack --stack-name "udapeople-frontend-${OldWorkflowID}"
             fi
             
 
@@ -258,12 +255,12 @@ workflows:
       #- deploy-backend
       #- deploy-backend:
       #    requires: [deploy-infrastructure]
-      - smoke-test
+      #- smoke-test
       #- smoke-test:
       #    requires: [deploy-backend]
       #- cloudfront-update
       #- cloudfront-update:
       #    requires: [smoke-test]
-      #- cleanup
+      - cleanup
       #- cleanup:
       #    requires: [cloudfront-update]
