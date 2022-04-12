@@ -237,6 +237,7 @@ jobs:
           command: |
             if [[ "${STACKS[@]}" =~ "${OldWorkflowID}" ]]
             then
+              echo "Removing old stacks"
               # aws cloudformation delete-stack --stack-name "udapeople-backend-${OldWorkflowID}"
             fi
             
