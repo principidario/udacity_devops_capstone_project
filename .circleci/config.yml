@@ -251,7 +251,7 @@ workflows:
     jobs:
         - lint-python
         - lint-docker
-        - build-docker
+        - build-docker:
             requires: [lint-docker]
         #- deploy-infrastructure
       
