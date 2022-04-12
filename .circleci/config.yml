@@ -113,7 +113,7 @@ jobs:
           command: |
             aws cloudformation deploy \
               --template-file .circleci/files/backend.yml \
-              --tags project=udapeople \
+              --tags project=udacity-devops-capstone \
               --stack-name "udacity-capstone-backend-${CIRCLE_WORKFLOW_ID:0:7}" \
               --parameter-overrides ID="${CIRCLE_WORKFLOW_ID:0:7}"
       - run:
@@ -249,11 +249,11 @@ jobs:
 workflows:
   default:
     jobs:
-        - lint-python
-        - lint-docker
-        - build-docker:
-            requires: [lint-docker]
-        #- deploy-infrastructure
+        #- lint-python
+        #- lint-docker
+        #- build-docker:
+        #    requires: [lint-docker]
+        - deploy-infrastructure
       
       # - deploy-infrastructure:
       #     requires: [lint-python, build-docker]
