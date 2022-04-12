@@ -11,5 +11,5 @@
     - ansible_stdout_callback: yaml
     - dockerpath: "{{ lookup('env', 'DOCKERPATH') }}"
   roles:
-    #- deploy
+    - deploy
     - deploy-container
