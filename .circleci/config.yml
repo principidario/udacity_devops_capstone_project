@@ -249,10 +249,10 @@ jobs:
 workflows:
   default:
     jobs:
-        #- lint-python
-        #- lint-docker
-        #- build-docker
-        #    requires: [lint-docker]
+        - lint-python
+        - lint-docker
+        - build-docker
+            requires: [lint-docker]
         #- deploy-infrastructure
       
       # - deploy-infrastructure:
