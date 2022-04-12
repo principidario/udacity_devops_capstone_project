@@ -263,7 +263,7 @@ workflows:
       #- smoke-test
       #- smoke-test:
       #    requires: [deploy-backend]
-      - loadbalancer-update
+      #- loadbalancer-update
       #- loadbalancer-update:
       #    requires: [smoke-test]
       #- cleanup
