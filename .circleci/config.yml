@@ -210,6 +210,7 @@ jobs:
           name: Update loadbalancer distribution
           command: |
             export EC2Instance=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=backend-udacity-devops-capstone-*" --query "Reservations[].Instances[].InstanceId" | sed 's/\[//' | sed 's/\]//' | sed 's/\"//g' | tr -d '\n' | sed 's/ //g' | sed 's/,//g')
+            export EC2Instance=i-008897b98285feaf3
             echo "${EC2Instance}"
             aws cloudformation deploy \
             --template-file .circleci/files/loadbalancer.yml \
