@@ -210,6 +210,7 @@ jobs:
           name: Update loadbalancer distribution
           command: |
             export EC2Instance=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=backend-udacity-devops-capstone-*" --query "Reservations[].Instances[].InstanceId" | sed 's/\[//' | sed 's/\]//' | sed 's/\"//g' | tr -d '\n' | sed 's/ //g' | sed 's/,//g')
+            echo "${EC2Instance}"
             aws cloudformation deploy \
             --template-file .circleci/files/loadbalancer.yml \
             --stack-name udacity-devops-capstone-loadbalancer \
@@ -260,10 +261,10 @@ workflows:
       #- deploy-backend
       #- deploy-backend:
       #    requires: [deploy-infrastructure]
-      - smoke-test
+      #- smoke-test
       #- smoke-test:
       #    requires: [deploy-backend]
-      #- loadbalancer-update
+      - loadbalancer-update
       #- loadbalancer-update:
       #    requires: [smoke-test]
       #- cleanup
