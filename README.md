@@ -1,62 +1,43 @@
-![principidario](https://circleci.com/gh/principidario/project-ml-microservice.svg?style=svg&circle-token=9e4d4472ee0b5cdfc602700b35fef2bbfa668438)(https://app.circleci.com/pipelines/github/principidario/project-ml-microservice/10/workflows/5231c20f-c139-4461-a7ef-c2f6887d2caf)
-
-
 ## Project Overview
 
-In this project, you will apply the skills you have acquired in this course to operationalize a Machine Learning Microservice API. 
+In this project you will apply the skills and knowledge which were developed throughout the Cloud DevOps Nanodegree program. These include:
 
-You are given a pre-trained, `sklearn` model that has been trained to predict housing prices in Boston according to several features, such as average rooms in a home and data about highway access, teacher-to-pupil ratios, and so on. You can read more about the data, which was initially taken from Kaggle, on [the data source site](https://www.kaggle.com/c/boston-housing). This project tests your ability to operationalize a Python flask app—in a provided file, `app.py`—that serves out predictions (inference) about housing prices through API calls. This project could be extended to any pre-trained machine learning model, such as those for image recognition and data labeling.
+* Working in AWS
+* Using Jenkins or Circle CI to implement Continuous Integration and Continuous Deployment
+* Building pipelines
+* Working with Ansible and CloudFormation to deploy clusters
+* Building Kubernetes clusters
+* Building Docker containers in pipelines
 
-### Project Tasks
+As a capstone project, the directions are rather more open-ended than they were in the previous projects in the program. You will also be able to make some of your own choices in this capstone, for the type of deployment you implement, which services you will use, and the nature of the application you develop.
 
-Your project goal is to operationalize this working, machine learning microservice using [kubernetes](https://kubernetes.io/), which is an open-source system for automating the management of containerized applications. In this project you will:
-* Test your project code using linting
-* Complete a Dockerfile to containerize this application
-* Deploy your containerized application using Docker and make a prediction
-* Improve the log statements in the source code for this application
-* Configure Kubernetes and create a Kubernetes cluster
-* Deploy a container using Kubernetes and make a prediction
-* Upload a complete Github repo with CircleCI to indicate that your code has been tested
+You will develop a CI/CD pipeline for micro services applications with either blue/green deployment or rolling deployment. You will also develop your Continuous Integration steps as you see fit, but must at least include typographical checking (aka “linting”). To make your project stand out, you may also choose to implement other checks such as security scanning, performance testing, integration testing, etc.!
 
-You can find a detailed [project rubric, here](https://review.udacity.com/#!/rubrics/2576/view).
+Once you have completed your Continuous Integration you will set up Continuous Deployment, which will include:
 
-**The final implementation of the project will showcase your abilities to operationalize production microservices.**
+* Pushing the built Docker container(s) to the Docker repository (you can use AWS ECR, create your own custom Registry within your cluster, or another 3rd party Docker repository) ; and
+* Deploying these Docker container(s) to a small Kubernetes cluster. For your Kubernetes cluster you can either use AWS Kubernetes as a Service, or build your own Kubernetes cluster. To deploy your Kubernetes cluster, use either Ansible or Cloudformation. Preferably, run these from within Jenkins or Circle CI as an independent pipeline.
 
----
+### Project description
 
-## Setup the Environment
+I have created an flask app (app.py) that runs a dummy machine learning model. The model is in working process and the idea is to take a short video from the camera of the mobile phone to the little finger of the right or left hand and to submitted to the model. The model will analize the video and will output an approximation of the level of oxygen saturation in arterial blood.
 
-* Create a virtualenv with Python 3.7 and activate it. Refer to this link for help on specifying the Python version in the virtualenv. 
-```bash
-python3 -m pip install --user virtualenv
-# You should have Python 3.7 available in your host. 
-# Check the Python path using `which python3`
-# Use a command similar to this one:
-python3 -m virtualenv --python=<path-to-Python3.7> .devops
-source .devops/bin/activate
-```
-* Run `make install` to install the necessary dependencies
+### Project steps
 
-### Running `app.py`
+* Create an app.py
+* Create a Dockerfile
+* Lint app.py and Dockerfile
+* Build docker image from Dockerfile
+* Deploy backend infrastructure (EC2 instance)
+* Deploy backend (install docker, minikube, kubectl)
+* Create kubernetes instance and run cluster
+* Smoke test to verify if kubernetes cluster is answering to port 80
+* Blue / Green migration (update instance ID in instance targets of the load balancer)
 
-1. Standalone:  `python app.py`
-2. Run in Docker:  `./run_docker.sh`
-3. Run in Kubernetes:  `./run_kubernetes.sh`
+All the steps were made using CircleCI, Ansible, AWS Cloudformation and a bit of bash scripting.  The folder SCREENSHOTS contains screenshots of all the CircleCI jobs.
 
-### Kubernetes Steps
+### Implementation testing
 
-* Setup and Configure Docker locally
-* Setup and Configure Kubernetes locally
-* Create Flask app in Container
-* Run via kubectl
+* Upload a file to EC2 instance: curl -X POST -F file=@"file.mp4" http://ec2-44-202-144-154.compute-1.amazonaws.com:8000/run
 
-
-## Summary of work done
-
-I have problems installing python requirements, so I decided to use the latest version of all the python libraries. Because of this, I couldn't import the joblib file with the ml model. Therefore I change the code to run a previously trained model based on Iris flower dataset.
-
-Besides that, app.py worked well in the virtual environment, in docker container and with kubernetes.
-
-I have a strange problem with pylint. When I type "pytlint ... app.py" no problem, works fine, but when I run the command "make lint", it returns errors.
-
-
+* Upload a file to load balancer: curl -X POST -F file=@"file.mp4" http://test-Application-Load-Balancer-2096421632.us-east-1.elb.amazonaws.com:80/run 
