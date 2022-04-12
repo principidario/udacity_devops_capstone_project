@@ -207,13 +207,13 @@ jobs:
             && rm -rf /var/cache/apk/*
           
       - run:
-          name: Update cloudfront distribution
+          name: Update loadbalancer distribution
           command: |
-          export EC2Instance=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=backend-udacity-devops-capstone-*" --query "Reservations[].Instances[].InstanceId" | sed 's/\[//' | sed 's/\]//' | sed 's/\"//g' | tr -d '\n' | sed 's/ //g')
-          aws cloudformation deploy \
-          --template-file .circleci/files/loadbalancer.yml \
-          --stack-name udacity-devops-capstone-loadbalancer \
-          --parameter-override EC2Instance=${EC2Instance}
+            export EC2Instance=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=backend-udacity-devops-capstone-*" --query "Reservations[].Instances[].InstanceId" | sed 's/\[//' | sed 's/\]//' | sed 's/\"//g' | tr -d '\n' | sed 's/ //g')
+            aws cloudformation deploy \
+            --template-file .circleci/files/loadbalancer.yml \
+            --stack-name udacity-devops-capstone-loadbalancer \
+            --parameter-override EC2Instance=${EC2Instance}
 
       
       # - destroy-environment:
