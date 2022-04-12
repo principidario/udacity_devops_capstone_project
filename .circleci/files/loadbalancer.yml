@@ -1,0 +1,122 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Create ALB, ALB security group, target groups, listeners and listener rules"
+Parameters:
+    VPC:
+        Type: String
+        Description: The vpc to launch the service
+        Default: vpc-2f007952
+
+    PublicSubnet1:
+        Type: String
+        Description: The subnet where to launch the service
+        Default: subnet-fa5b70db
+
+    PublicSubnet2:
+        Type: String
+        Description: the subnet where to Launch the service
+        Default: subnet-b91439df
+    
+    EC2Instance:
+        Type: String
+        Description: ec2 instance list
+
+Resources:
+
+
+
+    ALBSecurityGroup:
+        Type: "AWS::EC2::SecurityGroup"
+        Properties:
+            GroupDescription: "security group for ALB"
+            GroupName: "Udacity-ALB-SG"
+            VpcId: !Ref VPC
+            SecurityGroupIngress: 
+              - 
+                CidrIp: "0.0.0.0/0"
+                FromPort: 80
+                IpProtocol: "tcp"
+                ToPort: 8000
+    
+    ApplicationLoadBalancer:
+        Type: "AWS::ElasticLoadBalancingV2::LoadBalancer"
+        Properties:
+            Name: "test-Application-Load-Balancer"
+            Scheme: "internet-facing"
+            Type: "application"
+            Subnets: 
+              - !Ref PublicSubnet1
+              - !Ref PublicSubnet2
+            SecurityGroups: 
+              - !Ref ALBSecurityGroup
+            IpAddressType: "ipv4"
+
+    HTTPListener:
+        Type: "AWS::ElasticLoadBalancingV2::Listener"
+        Properties:
+            LoadBalancerArn: !Ref ApplicationLoadBalancer
+            Port: 80
+            Protocol: "HTTP"
+            DefaultActions: 
+              - 
+                Order: 1
+                TargetGroupArn: !Ref TestTargetGroup
+                Type: "forward"          
+
+    TestTargetGroup:
+        Type: "AWS::ElasticLoadBalancingV2::TargetGroup"
+        Properties:
+            HealthCheckIntervalSeconds: 30
+            HealthCheckPath: "/"
+            Port: 8000
+            Protocol: "HTTP"
+            HealthCheckPort: "traffic-port"
+            HealthCheckProtocol: "HTTP"
+            HealthCheckTimeoutSeconds: 5
+            UnhealthyThresholdCount: 2
+            TargetType: "instance"
+            Matcher: 
+                HttpCode: "200"
+            HealthyThresholdCount: 5
+            VpcId: !Ref VPC
+            Name: "target-group"
+            HealthCheckEnabled: true
+            Targets:
+              - Id: !Ref EC2Instance
+                Port: 8000
+
+    TestListenerRule:
+        Type: "AWS::ElasticLoadBalancingV2::ListenerRule"
+        Properties:
+            Priority: "1"
+            ListenerArn: !Ref HTTPListener
+            Conditions: 
+              - 
+                Field: "host-header"
+                Values: 
+                  - "test1.blog.avrcr.com"
+            Actions: 
+              - 
+                Type: "forward"
+                TargetGroupArn: !Ref TestTargetGroup
+                Order: 1
+                ForwardConfig: 
+                    TargetGroups: 
+                      - 
+                        TargetGroupArn: !Ref TestTargetGroup
+                        Weight: 1
+                    TargetGroupStickinessConfig: 
+                        Enabled: false
+
+
+Outputs:        
+    ALB:
+        Description: The created loadbalancer
+        Value: !Ref ApplicationLoadBalancer
+
+    TargetGroup:
+        Description: The created TargetGroup 1
+        Value: !Ref TestTargetGroup
+
+    LoadBalancerSecurityGroup:
+        Description: the securty group for the ALB
+        Value: !Ref ALBSecurityGroup

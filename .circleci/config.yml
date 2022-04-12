@@ -12,7 +12,8 @@ commands:
           name: destroy environments
           when: on_fail
           command: |
-            #aws cloudformation delete-stack --stack-name udapeople-backend-<< parameters.workflow-id >>
+            #aws cloudformation delete-stack --stack-name udacity-devops-capstone-backend-<< parameters.workflow-id >>
+            #aws cloudformation delete-stack --stack-name udacity-devops-capstone-loadbalancer
 
             
 jobs:
@@ -191,29 +192,32 @@ jobs:
             
           
 
-  cloudfront-update:
+  loadbalancer-update:
     docker:
-      - image: amazon/aws-cli
+      - image: alpine
     steps:
       - checkout
       - run:
           name: Install dependencies
           command: |
-              echo "Nothing to do here"
+            apk update
+            apk add --no-cache python3 py3-pip \
+            && pip3 install --upgrade pip \
+            && pip3 install awscli \
+            && rm -rf /var/cache/apk/*
+          
       - run:
           name: Update cloudfront distribution
           command: |
-            aws cloudformation deploy \
-            --template-file .circleci/files/cloudfront.yml \
-            --stack-name InitialStack \
-            --tags project=udapeople \
-            --parameter-overrides WorkflowID="udapeople-f11a082"
-            #--parameter-overrides WorkflowID="udapeople-${CIRCLE_WORKFLOW_ID:0:7}"
+          export EC2Instance=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=backend-udacity-devops-capstone-*" --query "Reservations[].Instances[].InstanceId" | sed 's/\[//' | sed 's/\]//' | sed 's/\"//g' | tr -d '\n' | sed 's/ //g')
+          aws cloudformation deploy \
+          --template-file .circleci/files/loadbalancer.yml \
+          --stack-name udacity-devops-capstone-loadbalancer \
+          --parameter-override EC2Instance=${EC2Instance}
+
       
-      
-      # Here's where you will add some code to rollback on failure  
-      #- revert-migrations:
-          #workflow-id: ${CIRCLE_WORKFLOW_ID:0:7}
+      # - destroy-environment:
+      #     workflow-id: ${CIRCLE_WORKFLOW_ID:0:7}
 
   cleanup:
     docker:
@@ -238,7 +242,7 @@ jobs:
             if [[ "${STACKS[@]}" =~ "${OldWorkflowID}" ]]
             then
               echo "Removing old stacks"
-              # aws cloudformation delete-stack --stack-name "udapeople-backend-${OldWorkflowID}"
+              # aws cloudformation delete-stack --stack-name "udacity-capstone-backend-${OldWorkflowID}"
             fi
             
 
@@ -259,9 +263,9 @@ workflows:
       #- smoke-test
       #- smoke-test:
       #    requires: [deploy-backend]
-      #- cloudfront-update
-      #- cloudfront-update:
+      - loadbalancer-update
+      #- loadbalancer-update:
       #    requires: [smoke-test]
-      - cleanup
+      #- cleanup
       #- cleanup:
       #    requires: [cloudfront-update]
