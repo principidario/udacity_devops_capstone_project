@@ -257,10 +257,10 @@ workflows:
       
       # - deploy-infrastructure:
       #     requires: [lint-python, build-docker]
-      - deploy-backend
+      #- deploy-backend
       #- deploy-backend:
       #    requires: [deploy-infrastructure]
-      #- smoke-test
+      - smoke-test
       #- smoke-test:
       #    requires: [deploy-backend]
       #- loadbalancer-update
