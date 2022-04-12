@@ -18,4 +18,4 @@ kubectl get pods
 # Step 4:
 # Forward the container port to a host
 kubectl expose pod ml --port=80 --name=ml-http
-kubectl port-forward pod/ml 8000:80
+kubectl port-forward pod/ml 8000:80 --address='0.0.0.0'

@@ -169,45 +169,23 @@ jobs:
           command: |
             apk update
             apk add curl
-            apk add npm
-            apk add --no-cache python3 py3-pip \
-            && pip3 install --upgrade pip \
-            && pip3 install awscli \
-            && rm -rf /var/cache/apk/*
-      - run:
-          name: Get backend url
-          command: |
-            #export BACKEND_IP=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=backend-${CIRCLE_WORKFLOW_ID:0:7}" --query "Reservations[].Instances[].PublicDnsName")
       - run:
           name: Backend smoke test.
           command: |
-            export BACKEND_IP=ec2-18-212-89-41.compute-1.amazonaws.com
-            export API_URL="http://${BACKEND_IP}:3030"
-            echo "${API_URL}"
-            if curl "${API_URL}/api/status" | grep "ok"
-            then
-                return 0
-            else
-                return 1
-            fi
-      - run:
-          name: Frontend smoke test.
-          command: |
-            URL="http://udapeople-f11a082.s3-website-us-east-1.amazonaws.com/#/employees"            
-            #URL="http://udapeople-${CIRCLE_WORKFLOW_ID:0:7}.s3-website-us-east-1.amazonaws.com/#/employees"            
+            #export BACKEND_IP=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=backend-udacity-devops-capstone-${CIRCLE_WORKFLOW_ID:0:7}" --query "Reservations[].Instances[].PublicDnsName")
+            export BACKEND_IP=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=backend-udacity-devops-capstone-*" --query "Reservations[].Instances[].PublicDnsName")
+            #export BACKEND_IP=ec2-18-212-89-41.compute-1.amazonaws.com
             
-            echo ${URL} 
-            if curl -s ${URL} | grep "Welcome"
+            export API_URL="http://${BACKEND_IP}:8000"
+            echo "${API_URL}"
+            if curl -X POST "${API_URL}/run"
             then
-            # Change this to 0 after the job fails
                 return 0
             else
                 return 1
             fi
-      #Here's where you will add some code to rollback on failure  
-      - destroy-environment:
-          workflow-id: 8717e8f
-          #workflow-id: ${CIRCLE_WORKFLOW_ID:0:7}
+      # - destroy-environment:
+      #     workflow-id: ${CIRCLE_WORKFLOW_ID:0:7}
             
           
 
@@ -268,8 +246,8 @@ workflows:
   default:
     jobs:
         #- lint-python
-        - lint-docker
-        - build-docker
+        #- lint-docker
+        #- build-docker
         #    requires: [lint-docker]
         #- deploy-infrastructure
       
@@ -277,10 +255,10 @@ workflows:
       #     requires: [lint-python, build-docker]
       #- deploy-backend
       #- deploy-backend:
-      #    requires: [run-migrations]
-      #- smoke-test
+      #    requires: [deploy-infrastructure]
+      - smoke-test
       #- smoke-test:
-      #    requires: [deploy-backend, deploy-frontend]
+      #    requires: [deploy-backend]
       #- cloudfront-update
       #- cloudfront-update:
       #    requires: [smoke-test]
