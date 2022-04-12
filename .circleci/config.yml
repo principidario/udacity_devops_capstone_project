@@ -253,11 +253,11 @@ workflows:
         #- lint-docker
         #- build-docker:
         #    requires: [lint-docker]
-        - deploy-infrastructure
+        #- deploy-infrastructure
       
       # - deploy-infrastructure:
       #     requires: [lint-python, build-docker]
-      #- deploy-backend
+      - deploy-backend
       #- deploy-backend:
       #    requires: [deploy-infrastructure]
       #- smoke-test
