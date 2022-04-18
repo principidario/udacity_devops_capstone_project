@@ -264,4 +264,4 @@ workflows:
       - loadbalancer-update:
          requires: [smoke-test]
       - cleanup:
-         requires: [cloudfront-update]
+         requires: [loadbalancer-update]
