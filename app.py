@@ -8,8 +8,6 @@ ALLOWED_EXTENSIONS = {'mp4'}
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app
-
 
 def allowed_file(filename):
     return '.' in filename and \
